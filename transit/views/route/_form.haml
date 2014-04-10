@@ -1,0 +1,6 @@
+%h1 TRANSIT
+
+%form{ action: '{% url "transit.views.route" %}', method: 'post' }
+  - csrf_token
+  = form.as_p
+  %input{ type: 'button', value: 'Get Me There!' }
