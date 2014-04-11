@@ -42,6 +42,7 @@ class RouteListLiveTestCase(TestCase):
       self.assertIn('tag', route.keys())
       self.assertIn('title', route.keys())
 
+
 class RouteConfigLiveTestCase(TestCase):
   def setUp(self):
     self.route_config = RouteConfig.get(agency='sf-muni', tag='N')

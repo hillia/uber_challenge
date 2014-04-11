@@ -18,3 +18,6 @@ class RouteConfig(NextbusBase):
     if self.tag != None:
       return { 'r': self.tag }
     return {}
+
+  def cache_key(self):
+    return self.command() + ':' + self.agency + ':' + (self.tag or 'all')
