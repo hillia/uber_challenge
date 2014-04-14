@@ -7,7 +7,8 @@ from transit.models import RouteConfig
 from transit.models import RouteList
 
 def index(request):
-  return render(request, 'transit/views/index.haml')
+  all_routes_json = RouteConfig.get(agency='sf-muni').__str__()
+  return render(request, 'transit/views/index.haml', {'all_routes_json': all_routes_json})
 
 def route_list(request):
   return HttpResponse(RouteList.get(agency='sf-muni'))

@@ -4,5 +4,14 @@
 %script{ src: "http://ajax.cdnjs.com/ajax/libs/underscore.js/1.6.0/underscore.js" }
 %script{ src: "http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone.js" }
 
+%link{ href: "{% static 'transit/css/index.css' %}", rel: "stylesheet", type: "text/css",}
+
 %script{ src: '{% static "transit/index_view.js" %}' }
+:javascript
+  $(function() {
+    RouteConfig.all = new RouteConfig({{all_routes_json|safe}});
+    indexView = new RouteConfigIndexView({ el: '#index-view', model: RouteConfig.all, range: 0.2 });
+  });
+
+
 #index-view
