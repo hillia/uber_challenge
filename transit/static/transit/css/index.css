@@ -1,4 +1,12 @@
 .route {
   list-style-type: none;
+}
+
+.route .route-name {
+  display: inline-block;
   font-size: 4em;
+}
+
+.route .route-info {
+  display: inline-block;
 }

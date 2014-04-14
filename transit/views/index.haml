@@ -1,16 +1,22 @@
 - load staticfiles
+- load jstemplate
+
 %script{ src: "https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js" }
 %script{ src: "http://cdnjs.cloudflare.com/ajax/libs/json2/20130526/json2.js" }
 %script{ src: "http://ajax.cdnjs.com/ajax/libs/underscore.js/1.6.0/underscore.js" }
 %script{ src: "http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone.js" }
 
-%link{ href: "{% static 'transit/css/index.css' %}", rel: "stylesheet", type: "text/css",}
+%script{ src: "{% static 'libs/mustache.js' %}" }
+%script{ src: "{% static 'libs/django.mustache.js' %}" }
+- mustachejs "route_config_summary"
 
-%script{ src: '{% static "transit/index_view.js" %}' }
+%link{ href: "{% static 'transit/css/index.css' %}", rel: "stylesheet", type: "text/css",}
+%script{ src: '{% static "transit/index.js" %}' }
+
 :javascript
   $(function() {
     RouteConfig.all = new RouteConfig({{all_routes_json|safe}});
-    indexView = new RouteConfigIndexView({ el: '#index-view', model: RouteConfig.all, range: 0.2 });
+    summaryView = new RouteConfigSummaryView({ el: '#index-view', model: RouteConfig.all, range: 0.2 });
   });
 
 

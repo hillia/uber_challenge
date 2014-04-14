@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'jstemplate',
     'transit'
 )
 
@@ -100,6 +101,9 @@ TEMPLATE_LOADERS = (
         'django.template.loaders.app_directories.Loader',
     )),
 )
+
+# JSTemplate config
+JSTEMPLATE_APP_DIRNAMES = ['static/transit/templates/']
 
 # Cache
 if TESTING:

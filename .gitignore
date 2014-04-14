@@ -54,3 +54,6 @@ docs/_build/
 
 # Emacs buffers
 *~
+
+# OS X filesystem
+*.DS_Store

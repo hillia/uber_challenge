@@ -21,6 +21,7 @@ $(function () {
       this.distance_squared = Number.POSITIVE_INFINITY;
       var route = this.get('routes')[0];
       var self = this;
+      // TODO: Should compare to route's max/min lon/lat first to see if any stop is in range.
       _.each(route['stops'], function(stop) {
         var stop_lat = parseFloat(stop['lat']);
         var stop_lon = parseFloat(stop['lon']);
@@ -49,10 +50,14 @@ $(function () {
       });
 
       return _nearby_routes;
+    },
+
+    tag: function() {
+      return this.get('routes')[0]['tag'];
     }
   });
 
-  RouteConfigIndexView = Backbone.View.extend({
+  RouteConfigSummaryView = Backbone.View.extend({
     initialize: function(options) {
       this.range = options['range'];
       if (Coordinates.current != undefined) {
@@ -67,8 +72,7 @@ $(function () {
       route_configs = this.model.nearby_routes(Coordinates.current, this.range);
       var self = this;
       _.each(route_configs, function(route_config) {
-        route_tag = route_config.get('routes')[0]['tag'];
-        self.$el.append('<li class="route" data-tag="' + route_tag + '">' + route_tag + '</li>');
+        self.$el.append(Mustache.render(Mustache.TEMPLATES.route_config_summary, { tag: route_config.tag(), nearest_stop: route_config.nearest_stop['title'] }));
       });
     }
   });
