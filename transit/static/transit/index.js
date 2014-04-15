@@ -121,8 +121,8 @@ $(function () {
           path: route_points,
           geodesic: true,
           strokeColor: color,
-          strokeOpacity: 1.0,
-          strokeWeight: 2
+          strokeOpacity: 0.6,
+          strokeWeight: 4
         });
         route_path.setMap(this_map);
 
@@ -133,7 +133,8 @@ $(function () {
         map: this.map,
         draggable: false,
         animation: google.maps.Animation.DROP,
-        position: new google.maps.LatLng(parseFloat(nearest_stop['lat']), parseFloat(nearest_stop['lon']))
+        position: new google.maps.LatLng(parseFloat(nearest_stop['lat']), parseFloat(nearest_stop['lon'])),
+        title: route_config.get('tag') + " stop at " + nearest_stop['title']
       });
     },
 
@@ -141,7 +142,8 @@ $(function () {
       this.me_marker = new google.maps.Marker({
         map: this.map,
         draggable: false,
-        position: new google.maps.LatLng(coordinates['latitude'], coordinates['longitude'])
+        position: new google.maps.LatLng(coordinates['latitude'], coordinates['longitude']),
+        title: 'You'
       });
     },
 
