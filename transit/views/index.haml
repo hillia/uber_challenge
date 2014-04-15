@@ -5,18 +5,20 @@
 %script{ src: "http://cdnjs.cloudflare.com/ajax/libs/json2/20130526/json2.js" }
 %script{ src: "http://ajax.cdnjs.com/ajax/libs/underscore.js/1.6.0/underscore.js" }
 %script{ src: "http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone.js" }
+%script{ src: "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-awxGu1AJDf_bPVsg3qljTVR_K44SCMc&sensor=true" }
 
 %script{ src: "{% static 'libs/mustache.js' %}" }
 %script{ src: "{% static 'libs/django.mustache.js' %}" }
-- mustachejs "route_config_summary"
+- mustachejs "route_config_list_item"
 
 %link{ href: "{% static 'transit/css/index.css' %}", rel: "stylesheet", type: "text/css",}
 %script{ src: '{% static "transit/index.js" %}' }
 
 :javascript
   $(function() {
-    RouteConfig.all = new RouteConfig({{all_routes_json|safe}});
-    summaryView = new RouteConfigSummaryView({ el: '#index-view', model: RouteConfig.all, range: 0.2 });
+    // TODO: Pass this through view.
+    RouteConfig.all = new RouteConfigList({{all_routes_json|safe}}['routes']);
+    RouteConfigIndexView.singleton = new RouteConfigIndexView({ el: '#index-view' });
   });
 
 

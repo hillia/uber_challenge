@@ -1,5 +1,17 @@
+#index-view {
+  height: 100%;
+  overflow: hidden;
+}
+
 .route {
   list-style-type: none;
+  height: 70px;
+  border: black 1px solid;
+  border-bottom-width: 0px;
+}
+
+.route:last-child {
+  border-bottom-width: 1px;
 }
 
 .route .route-name {
@@ -9,4 +21,19 @@
 
 .route .route-info {
   display: inline-block;
+}
+
+.route-config-list {
+  display: inline-block;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 50%;
+  height: 100%;
+}
+
+.map {
+  display: inline-block;
+  vertical-align: top;
+  height: 99%;
+  width: 49%;
 }
