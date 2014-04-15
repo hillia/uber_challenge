@@ -73,7 +73,7 @@ $(function () {
 
   RouteConfigListView = Backbone.View.extend({
     events: {
-      'click .route': 'show_route'
+      'mouseover .route': 'show_route'
     },
 
     initialize: function(options) {
@@ -81,7 +81,11 @@ $(function () {
     },
 
     show_route: function(evt) {
-      var route_config = this.model.findWhere({ tag: String($(evt.currentTarget).data('tag')) });
+      $route = $(evt.currentTarget);
+      var route_config = this.model.findWhere({ tag: String($route.data('tag')) });
+
+      $('.route').removeClass('selected');
+      $route.addClass('selected');
       MapView.singleton.draw_route(route_config);
     },
 
@@ -97,21 +101,28 @@ $(function () {
 
   MapView = Backbone.View.extend({
     draw_route: function(route_config) {
-      if (this.stop_marker != undefined) {
-        this.stop_marker.setMap(null);
+      if (this.nearest_stop_marker != undefined) {
+        this.nearest_stop_marker.setMap(null);
       }
       if (this.route_paths != undefined) {
         _.each(this.route_paths, function(path) {
           path.setMap(null);
         });
       }
-      this.stop_marker = null;
-      this.route_paths = [];
+      if (this.stop_markers != undefined) {
+        _.each(this.stop_markers, function(stop_marker) {
+          stop_marker.setMap(null);
+        })
+      }
 
-      var color = route_config.get('color');
+      this.nearest_stop_marker = null;
+      this.route_paths = null;
+      this.stop_markers = null;
+
+      var route_color = route_config.get('color');
       var nearest_stop = route_config.nearest_stop;
 
-      this_map = this.map;
+      var self = this;
       this.route_paths = _.map(route_config.get('paths'), function(path) {
         var route_points = _.map(path['points'], function(point) {
           return new google.maps.LatLng(parseFloat(point['lat']), parseFloat(point['lon']));
@@ -120,21 +131,46 @@ $(function () {
         var route_path = new google.maps.Polyline({
           path: route_points,
           geodesic: true,
-          strokeColor: color,
-          strokeOpacity: 0.6,
-          strokeWeight: 4
+          strokeColor: route_color,
+          strokeOpacity: 0.4,
+          strokeWeight: 4,
+          icons: [{
+            offset: '50%',
+            icon: {
+              path: google.maps.SymbolPath.FORWARD_OPEN_ARROW,
+              scale: 3
+            }
+          }],
+          zIndex: 0
         });
-        route_path.setMap(this_map);
+        route_path.setMap(self.map);
 
         return route_path;
       });
 
-      this.stop_marker = new google.maps.Marker({
-        map: this.map,
-        draggable: false,
-        animation: google.maps.Animation.DROP,
-        position: new google.maps.LatLng(parseFloat(nearest_stop['lat']), parseFloat(nearest_stop['lon'])),
-        title: route_config.get('tag') + " stop at " + nearest_stop['title']
+      var nearest_stop_icon = {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 8,
+        strokeColor: route_color,
+        strokeOpacity: 0.9,
+        strokeWeight: 5
+      }
+
+      var normal_stop_icon = {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillOpacity: 0.7,
+        fillColor: route_color,
+        scale: 4,
+        strokeOpacity: 0
+      }
+
+      this.stop_markers = _.map(route_config.get('stops'), function(stop) {
+        return new google.maps.Marker({
+          map: self.map,
+          position: new google.maps.LatLng(parseFloat(stop['lat']), parseFloat(stop['lon'])),
+          title: route_config.get('tag') + " stop at " + stop['title'],
+          icon: (nearest_stop == stop ? nearest_stop_icon : normal_stop_icon)
+        });
       });
     },
 
@@ -143,14 +179,21 @@ $(function () {
         map: this.map,
         draggable: false,
         position: new google.maps.LatLng(coordinates['latitude'], coordinates['longitude']),
-        title: 'You'
+        title: 'You',
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          fillOpacity: 1,
+          scale: 7,
+          strokeOpacity: 0
+        },
+        zIndex: 9001
       });
     },
 
     render: function() {
       var mapOptions = {
         center: new google.maps.LatLng(Coordinates.current['latitude'], Coordinates.current['longitude']),
-        zoom: 16
+        zoom: 15
       };
       this.map = new google.maps.Map(this.$el[0], mapOptions);
       this.mark_me(Coordinates.current);

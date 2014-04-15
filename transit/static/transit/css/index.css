@@ -14,6 +14,10 @@
   border-bottom-width: 1px;
 }
 
+.route.selected {
+  background-color: #DDD;
+}
+
 .route .route-name {
   display: inline-block;
   font-size: 4em;
