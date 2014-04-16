@@ -10,6 +10,7 @@
 %script{ src: "{% static 'libs/mustache.js' %}" }
 %script{ src: "{% static 'libs/django.mustache.js' %}" }
 - mustachejs "route_config_list_item"
+- mustachejs "intro_screen"
 
 %link{ href: "{% static 'transit/css/index.css' %}", rel: "stylesheet", type: "text/css",}
 %script{ src: '{% static "transit/index.js" %}' }
@@ -20,7 +21,9 @@
   $(function() {
     // TODO: Pass this through view.
     RouteConfig.all = new RouteConfigList({{all_routes_json|safe}}['routes']);
-    RouteConfigIndexView.singleton = new RouteConfigIndexView({ el: '#index-view' });
+    //RouteConfigIndexView.singleton = new RouteConfigIndexView({ el: '#index-view' });
+    IndexView.singleton = new IndexView({ el: '#index-view' });
+    IndexView.singleton.render();
   });
 
 

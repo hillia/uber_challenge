@@ -224,4 +224,10 @@ $(function () {
       MapView.singleton.render();
     }
   });
+
+  IndexView = Backbone.View.extend({
+    render: function() {
+      this.$el.html(Mustache.render(Mustache.TEMPLATES.intro_screen));
+    }
+  });
 });
