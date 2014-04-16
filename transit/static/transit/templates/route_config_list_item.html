@@ -1,8 +1,15 @@
 <li class="route" data-tag="{{ tag }}">
-  <div class="route-name"> {{ tag }} </div>
+  <div class="route-name">
+    {{ tag }}
+  </div>
   <div class="route-info">
-    <div class="stop">
+    <div class="route-title">
+      {{ title }}
+    </div>
+    <div class="route-nearest-stop">
       Nearest Stop: {{ nearest_stop }}
     </div>
   </div>
+  <div class="route-color" style="background-color:{{color}}"/>
+  <div class="gradient-overlay"/>
 </li>

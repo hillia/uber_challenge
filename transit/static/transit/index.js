@@ -94,7 +94,12 @@ $(function () {
       this.$el.html('');
       var self = this;
       _.each(route_configs, function(route_config) {
-        self.$el.append(Mustache.render(Mustache.TEMPLATES.route_config_list_item, { tag: route_config.get('tag'), nearest_stop: route_config.nearest_stop['title'] }));
+        self.$el.append(Mustache.render(Mustache.TEMPLATES.route_config_list_item, {
+          tag: route_config.get('tag'),
+          nearest_stop: route_config.nearest_stop['title'],
+          title: route_config.get('title'),
+          color: route_config.get('color')
+        }));
       });
     }
   });
