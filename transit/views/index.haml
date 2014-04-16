@@ -19,12 +19,10 @@
 
 :javascript
   $(function() {
-    // TODO: Pass this through view.
-    RouteConfig.all = new RouteConfigList({{all_routes_json|safe}}['routes']);
-    //RouteConfigIndexView.singleton = new RouteConfigIndexView({ el: '#index-view' });
-    IndexView.singleton = new IndexView({ el: '#index-view' });
-    IndexView.singleton.render();
+    TransitApp = new TransitRouter();
+    Backbone.history.start();
   });
 
 
-#index-view
+#main-view
+#other-view

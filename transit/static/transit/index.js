@@ -21,7 +21,13 @@ $(function () {
 
   RouteConfig = Backbone.Model.extend({
     parse: function(response) {
-      return response.routes[0];
+      if (response['routes'] != undefined) {
+        // If we're fetching from the server, it will return it in the NextBus API format.
+        return response['routes'][0];
+      } else {
+        // But if RouteConfigList is creating them, it will just pass the attributes.
+        return response;
+      }
     },
 
     url: function() {
@@ -30,6 +36,8 @@ $(function () {
 
     // TODO: Geolocated RouteConfig should probably be a separate model: GeolocatedRoute
     geolocate: function(coordinates) {
+      if (coordinates == this.coordinates) { return }
+
       this.coordinates = coordinates;
       this.distance_squared = Number.POSITIVE_INFINITY;
       var self = this;
@@ -40,7 +48,7 @@ $(function () {
         var stop_distance_squared = Math.pow(Math.abs(stop_lat - self.coordinates['latitude']), 2) + Math.pow(Math.abs(stop_lon - self.coordinates['longitude']), 2);
         if (stop_distance_squared < self.distance_squared) {
           self.distance_squared = stop_distance_squared;
-          self.nearest_stop = stop;
+          self._nearest_stop = stop;
         }
       });
     },
@@ -48,6 +56,13 @@ $(function () {
     is_within: function(miles) {
       return this.distance_squared <= Math.pow(Math.abs(miles / RouteHelpers.MILES_PER_MERIDIANS), 2);
     },
+
+    nearest_stop: function() {
+      if (this.coordinates == undefined) {
+        throw "Cannot determine nearest stop unless geolocate() has been called.";
+      }
+      return this._nearest_stop;
+    }
   });
 
   RouteConfigList = Backbone.Collection.extend({
@@ -57,17 +72,16 @@ $(function () {
 
     url: function() { return 'route_config/'; },
 
+    // TODO: This should be a static function that returns a RouteConfigList with just nearby routes
     nearby_routes: function(my_coordinates, range_in_miles) {
-      var _nearby_routes = [];
+      nearby_route_list = new RouteConfigList();
 
-      _.each(this.models, function(route_config) {
+      nearby_route_list.models = _.filter(this.models, function(route_config) {
         route_config.geolocate(my_coordinates);
-        if (route_config.is_within(range_in_miles)) {
-          _nearby_routes.push(route_config);
-        }
+        return route_config.is_within(range_in_miles);
       });
 
-      return _nearby_routes;
+      return nearby_route_list;
     }
   });
 
@@ -90,13 +104,14 @@ $(function () {
     },
 
     render: function() {
-      route_configs = this.model.nearby_routes(Coordinates.current, this.range);
+      // TODO: This should just render the list agnostic of whether it's near or not.
+      route_list = this.model.nearby_routes(Coordinates.current, this.range);
       this.$el.html('');
       var self = this;
-      _.each(route_configs, function(route_config) {
+      _.each(route_list.models, function(route_config) {
         self.$el.append(Mustache.render(Mustache.TEMPLATES.route_config_list_item, {
           tag: route_config.get('tag'),
-          nearest_stop: route_config.nearest_stop['title'],
+          nearest_stop: route_config.nearest_stop()['title'],
           title: route_config.get('title'),
           color: route_config.get('color')
         }));
@@ -125,7 +140,7 @@ $(function () {
       this.stop_markers = null;
 
       var route_color = route_config.get('color');
-      var nearest_stop = route_config.nearest_stop;
+      var nearest_stop = route_config.nearest_stop();
 
       var self = this;
       this.route_paths = _.map(route_config.get('paths'), function(path) {
@@ -206,18 +221,25 @@ $(function () {
   });
 
   RouteConfigIndexView = Backbone.View.extend({
-    initialize: function() {
-      Map.on('ready', this.render_if_ready, this);
-      Coordinates.on('ready', this.render_if_ready, this);
-    },
-
-    render_if_ready: function() {
-      if (Map.ready && Coordinates.ready) { this.render(); }
+    initialize: function(opts) {
+      this.listening = false;
+      this.range = opts['range'];
     },
 
     render: function() {
+      if (!this.listening) {
+        this.listening = true;
+        Map.on('ready', this.render, this);
+        Coordinates.on('ready', this.render, this);
+        this.model.on('changed', this.render, this);
+      }
+
+      if (Map.ready && Coordinates.ready && this.model.length > 0) { this._render(); }
+    },
+
+    _render: function() {
       this.$el.html('<div class="route-config-list"></div> <div class="map"></div>');
-      this.list_view = new RouteConfigListView({ el: '.route-config-list', model: RouteConfig.all, range: 0.2 });
+      this.list_view = new RouteConfigListView({ el: '.route-config-list', model: this.model, range: this.range });
       this.list_view.render();
 
       MapView.singleton = new MapView({ el: this.$el.find('.map') });
@@ -226,8 +248,33 @@ $(function () {
   });
 
   IndexView = Backbone.View.extend({
+    initialize: function() {},
+
     render: function() {
       this.$el.html(Mustache.render(Mustache.TEMPLATES.intro_screen));
+      this.$el.find('#find-muni-button').click(function() {
+        TransitApp.navigate('routes/nearby/.25', {trigger: true});
+      });
     }
   });
+
+  TransitRouter = Backbone.Router.extend({
+    routes: {
+      "":                          "index",
+      "routes/nearby/:range":     "routes_nearby"
+    },
+
+    index: function() {
+      this.indexView = new IndexView({ el: '#main-view' });
+      this.indexView.render();
+    },
+
+    routes_nearby: function(range) {
+      var route_list = new RouteConfigList();
+      route_list.fetch();
+      this.nearbyRoutesView = new RouteConfigIndexView({ el: '#main-view', model: route_list, range: parseFloat(range) });
+      this.nearbyRoutesView.render();
+    }
+  });
+
 });
