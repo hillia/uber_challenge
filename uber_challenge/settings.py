@@ -86,6 +86,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/var/www/static'
+
 
 # Template config
 TEMPLATE_DIRS = (
