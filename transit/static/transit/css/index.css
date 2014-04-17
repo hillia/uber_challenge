@@ -87,6 +87,7 @@ body {
 
 .route {
   position: relative;
+  white-space: nowrap;
   list-style-type: none;
   height: 70px;
   background-color: #FCFCFC;
@@ -96,17 +97,8 @@ body {
   -webkit-filter: contrast(110%);
 }
 
-.route > div {
-  display:inline-block;
-}
-
-.route-info {
-  font-family: "Lucida Grande";
-  text-shadow: 0px 1px 2px #DDD;
-  color: #333;
-}
-
 .route .route-name {
+  display: inline-block;
   width: 135px;
   height: inherit;
   margin-right: 10px;
@@ -119,15 +111,26 @@ body {
   text-shadow: 0px 1px 1px #666;
 }
 
+.route .route-info {
+  display: inline-block;
+  overflow: hidden;
+  font-family: "Lucida Grande";
+  text-shadow: 0px 1px 2px #DDD;
+  color: #333;
+}
+
 .route .route-color {
   position: absolute;
+  top: 0px;
   right: 0px;
   height: inherit;
   width: 25px;
+  z-index: 1;
 }
 
 .gradient-overlay {
   position: absolute;
+  top: 0px;
   left: 0px;
   height: inherit;
   width: 100%;
