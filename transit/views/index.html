@@ -1,0 +1,27 @@
+{% load staticfiles %}
+{% load jstemplate %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js" type="text/javascript"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/json2/20130526/json2.js" type="text/javascript"></script>
+<script src="http://ajax.cdnjs.com/ajax/libs/underscore.js/1.6.0/underscore.js" type="text/javascript"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone.js" type="text/javascript"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-awxGu1AJDf_bPVsg3qljTVR_K44SCMc&sensor=true" type="text/javascript"></script>
+
+<script src="{% static 'libs/mustache.js' %}" type="text/javascript"></script>
+<script src="{% static 'libs/django.mustache.js' %}" type="text/javascript"></script>
+{% mustachejs "route_config_list_item" %}
+{% mustachejs "intro_screen" %}
+{% mustachejs "spinner" %}
+
+<link href="{% static 'transit/css/index.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'transit/css/spinner.css' %}" rel="stylesheet" type="text/css"/>
+<script src="{% static "transit/index.js" %}"></script>
+
+<script type="text/javascript">
+  $(function() {
+    TransitApp = new TransitRouter();
+    Backbone.history.start();
+  });
+</script>
+
+<div id="main-view"/>

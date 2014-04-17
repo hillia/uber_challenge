@@ -87,15 +87,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# Template stuff
-
+# Template config
 TEMPLATE_DIRS = (
     BASE_DIR,
 )
 
 TEMPLATE_LOADERS = (
-    'hamlpy.template.loaders.HamlPyFilesystemLoader',
-    'hamlpy.template.loaders.HamlPyAppDirectoriesLoader',
     ('django.template.loaders.cached.Loader', (
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
