@@ -91,7 +91,7 @@ STATIC_ROOT = '/var/www/static'
 
 # Template config
 TEMPLATE_DIRS = (
-    BASE_DIR,
+    BASE_DIR + '/transit/views',
 )
 
 TEMPLATE_LOADERS = (
