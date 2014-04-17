@@ -11,8 +11,10 @@
 %script{ src: "{% static 'libs/django.mustache.js' %}" }
 - mustachejs "route_config_list_item"
 - mustachejs "intro_screen"
+- mustachejs "spinner"
 
 %link{ href: "{% static 'transit/css/index.css' %}", rel: "stylesheet", type: "text/css",}
+%link{ href: "{% static 'transit/css/spinner.css' %}", rel: "stylesheet", type: "text/css",}
 %script{ src: '{% static "transit/index.js" %}' }
 
 #masthead

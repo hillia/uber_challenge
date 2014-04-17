@@ -242,7 +242,7 @@ $(function () {
     },
 
     render: function() {
-      this.$el.html('<div class="route-config-list"></div> <div class="map"></div>');
+      this.$el.html('<div class="route-config-list">' + Mustache.TEMPLATES.spinner + '</div> <div class="map">' + Mustache.TEMPLATES.spinner + '</div>');
 
       MapView.singleton = new MapView({ el: '.map' });
       MapView.singleton.render();
@@ -254,7 +254,7 @@ $(function () {
 
   IndexView = Backbone.View.extend({
     render: function() {
-      this.$el.html(Mustache.render(Mustache.TEMPLATES.intro_screen));
+      this.$el.html(Mustache.TEMPLATES.intro_screen);
       this.$el.find('#find-muni-button').click(function() {
         TransitApp.navigate('routes/nearby/.25', {trigger: true});
       });
@@ -263,7 +263,7 @@ $(function () {
 
   TransitRouter = Backbone.Router.extend({
     routes: {
-      "":                          "index",
+      "":                         "index",
       "routes/nearby/:range":     "routes_nearby"
     },
 
