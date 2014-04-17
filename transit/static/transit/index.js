@@ -34,33 +34,31 @@ $(function () {
       return 'route_config/' + this.get('tag');
     },
 
-    // TODO: Geolocated RouteConfig should probably be a separate model: GeolocatedRoute
     geolocate: function(coordinates) {
       if (coordinates == this.coordinates) { return }
 
       this.coordinates = coordinates;
       this.distance_squared = Number.POSITIVE_INFINITY;
-      var self = this;
+
       // TODO: Should compare to route's max/min lon/lat first to see if any stop is in range.
       _.each(this.get('stops'), function(stop) {
         var stop_lat = parseFloat(stop['lat']);
         var stop_lon = parseFloat(stop['lon']);
-        var stop_distance_squared = Math.pow(Math.abs(stop_lat - self.coordinates['latitude']), 2) + Math.pow(Math.abs(stop_lon - self.coordinates['longitude']), 2);
-        if (stop_distance_squared < self.distance_squared) {
-          self.distance_squared = stop_distance_squared;
-          self._nearest_stop = stop;
+        var stop_distance_squared = Math.pow(Math.abs(stop_lat - this.coordinates['latitude']), 2) + Math.pow(Math.abs(stop_lon - this.coordinates['longitude']), 2);
+        if (stop_distance_squared < this.distance_squared) {
+          this.distance_squared = stop_distance_squared;
+          this._nearest_stop = stop;
         }
-      });
+      }, this);
     },
 
-    is_within: function(miles) {
+    is_within: function(miles, coordinates) {
+      this.geolocate(coordinates);
       return this.distance_squared <= Math.pow(Math.abs(miles / RouteHelpers.MILES_PER_MERIDIANS), 2);
     },
 
-    nearest_stop: function() {
-      if (this.coordinates == undefined) {
-        throw "Cannot determine nearest stop unless geolocate() has been called.";
-      }
+    nearest_stop: function(coordinates) {
+      this.geolocate(coordinates);
       return this._nearest_stop;
     }
   });
@@ -71,30 +69,20 @@ $(function () {
     parse: function(response) { return response.routes; },
 
     url: function() { return 'route_config/'; },
-
-    // TODO: This should be a static function that returns a RouteConfigList with just nearby routes
-    nearby_routes: function(my_coordinates, range_in_miles) {
-      nearby_route_list = new RouteConfigList();
-
-      nearby_route_list.models = _.filter(this.models, function(route_config) {
-        route_config.geolocate(my_coordinates);
-        return route_config.is_within(range_in_miles);
-      });
-
-      return nearby_route_list;
-    }
   });
 
   RouteConfigListView = Backbone.View.extend({
+    loading: false,
+
     events: {
-      'mouseover .route': 'show_route'
+      'mouseover .route': 'map_route'
     },
 
     initialize: function(options) {
       this.range = options['range'];
     },
 
-    show_route: function(evt) {
+    map_route: function(evt) {
       $route = $(evt.currentTarget);
       var route_config = this.model.findWhere({ tag: String($route.data('tag')) });
 
@@ -103,23 +91,49 @@ $(function () {
       MapView.singleton.draw_route(route_config);
     },
 
-    render: function() {
-      // TODO: This should just render the list agnostic of whether it's near or not.
-      route_list = this.model.nearby_routes(Coordinates.current, this.range);
+    render_nearby_routes: function() {
       this.$el.html('');
-      var self = this;
-      _.each(route_list.models, function(route_config) {
-        self.$el.append(Mustache.render(Mustache.TEMPLATES.route_config_list_item, {
-          tag: route_config.get('tag'),
-          nearest_stop: route_config.nearest_stop()['title'],
-          title: route_config.get('title'),
-          color: route_config.get('color')
-        }));
-      });
+      _.each(this.model.models, function(route_config) {
+        if (route_config.is_within(this.range, Coordinates.current)) {
+          this.render_route(route_config);
+        }
+      }, this);
+    },
+
+    render_route: function(route_config) {
+      this.$el.append(Mustache.render(Mustache.TEMPLATES.route_config_list_item, {
+        tag: route_config.get('tag'),
+        nearest_stop: route_config.nearest_stop(Coordinates.current)['title'],
+        title: route_config.get('title'),
+        color: route_config.get('color')
+      }));
+    },
+
+    render: function() {
+      if (Coordinates.ready && this.model.length > 0) {
+        this.loading = false;
+        this.render_nearby_routes();
+      } else if (!this.loading) {
+        this.loading = true;
+        Coordinates.on('ready', this.render, this);
+        this.model.on('add', this.render, this);
+      }
     }
   });
 
   MapView = Backbone.View.extend({
+    loading: false,
+
+    init_map: function() {
+      var mapOptions = {
+        center: new google.maps.LatLng(Coordinates.current['latitude'], Coordinates.current['longitude']),
+        zoom: 15
+      };
+      this.map = new google.maps.Map(this.$el[0], mapOptions);
+
+      this.mark_me(Coordinates.current);
+    },
+
     draw_route: function(route_config) {
       if (this.nearest_stop_marker != undefined) {
         this.nearest_stop_marker.setMap(null);
@@ -140,9 +154,8 @@ $(function () {
       this.stop_markers = null;
 
       var route_color = route_config.get('color');
-      var nearest_stop = route_config.nearest_stop();
+      var nearest_stop = route_config.nearest_stop(Coordinates.current);
 
-      var self = this;
       this.route_paths = _.map(route_config.get('paths'), function(path) {
         var route_points = _.map(path['points'], function(point) {
           return new google.maps.LatLng(parseFloat(point['lat']), parseFloat(point['lon']));
@@ -163,10 +176,10 @@ $(function () {
           }],
           zIndex: 0
         });
-        route_path.setMap(self.map);
+        route_path.setMap(this.map);
 
         return route_path;
-      });
+      }, this);
 
       var nearest_stop_icon = {
         path: google.maps.SymbolPath.CIRCLE,
@@ -186,12 +199,12 @@ $(function () {
 
       this.stop_markers = _.map(route_config.get('stops'), function(stop) {
         return new google.maps.Marker({
-          map: self.map,
+          map: this.map,
           position: new google.maps.LatLng(parseFloat(stop['lat']), parseFloat(stop['lon'])),
           title: route_config.get('tag') + " stop at " + stop['title'],
           icon: (nearest_stop == stop ? nearest_stop_icon : normal_stop_icon)
         });
-      });
+      }, this);
     },
 
     mark_me: function(coordinates) {
@@ -211,12 +224,14 @@ $(function () {
     },
 
     render: function() {
-      var mapOptions = {
-        center: new google.maps.LatLng(Coordinates.current['latitude'], Coordinates.current['longitude']),
-        zoom: 15
-      };
-      this.map = new google.maps.Map(this.$el[0], mapOptions);
-      this.mark_me(Coordinates.current);
+      if (Map.ready && Coordinates.ready) {
+        this.loading = false;
+        this.init_map();
+      } else if (!this.loading) {
+        this.loading = true;
+        Map.on("ready", this.render, this);
+        Coordinates.on('ready', this.render, this);
+      }
     }
   });
 
@@ -227,29 +242,17 @@ $(function () {
     },
 
     render: function() {
-      if (!this.listening) {
-        this.listening = true;
-        Map.on('ready', this.render, this);
-        Coordinates.on('ready', this.render, this);
-        this.model.on('changed', this.render, this);
-      }
-
-      if (Map.ready && Coordinates.ready && this.model.length > 0) { this._render(); }
-    },
-
-    _render: function() {
       this.$el.html('<div class="route-config-list"></div> <div class="map"></div>');
+
+      MapView.singleton = new MapView({ el: '.map' });
+      MapView.singleton.render();
+
       this.list_view = new RouteConfigListView({ el: '.route-config-list', model: this.model, range: this.range });
       this.list_view.render();
-
-      MapView.singleton = new MapView({ el: this.$el.find('.map') });
-      MapView.singleton.render();
     }
   });
 
   IndexView = Backbone.View.extend({
-    initialize: function() {},
-
     render: function() {
       this.$el.html(Mustache.render(Mustache.TEMPLATES.intro_screen));
       this.$el.find('#find-muni-button').click(function() {
