@@ -124,10 +124,24 @@ $(function () {
   MapView = Backbone.View.extend({
     loading: false,
 
+    initialize: function(options) {
+      this.range = options['range'];
+    },
+
     init_map: function() {
+      var zoom;
+      console.log("RANGE", this.range);
+      if (this.range <= .5) {
+        zoom = 15;
+      } else if(this.range >= 2) {
+        zoom = 11;
+      } else {
+        zoom = 13;
+      }
+
       var mapOptions = {
         center: new google.maps.LatLng(Coordinates.current['latitude'], Coordinates.current['longitude']),
-        zoom: 15
+        zoom: zoom
       };
       this.map = new google.maps.Map(this.$el[0], mapOptions);
 
@@ -244,7 +258,7 @@ $(function () {
     render: function() {
       this.$el.html('<div class="route-config-list">' + Mustache.TEMPLATES.spinner + '</div> <div class="map">' + Mustache.TEMPLATES.spinner + '</div>');
 
-      MapView.singleton = new MapView({ el: '.map' });
+      MapView.singleton = new MapView({ el: '.map', range: this.range });
       MapView.singleton.render();
 
       this.list_view = new RouteConfigListView({ el: '.route-config-list', model: this.model, range: this.range });
@@ -256,7 +270,7 @@ $(function () {
     render: function() {
       this.$el.html(Mustache.TEMPLATES.intro_screen);
       this.$el.find('#find-muni-button').click(function() {
-        TransitApp.navigate('routes/nearby/.25', {trigger: true});
+        TransitApp.navigate('routes/nearby/' + $('#find-range-select option:selected').val(), {trigger: true});
       });
     }
   });
