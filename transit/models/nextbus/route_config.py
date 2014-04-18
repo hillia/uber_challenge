@@ -1,4 +1,4 @@
-from transit.models import NextbusBase
+from transit.models.nextbus import NextbusBase
 
 class RouteConfig(NextbusBase):
   @staticmethod

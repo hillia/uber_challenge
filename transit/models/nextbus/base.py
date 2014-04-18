@@ -30,10 +30,13 @@ class NextbusBase(object):
     return cache.get(self.cache_key())
 
   def _save_to_cache(self):
-    cache.set(self.cache_key(), self.json, 86400)
+    cache.set(self.cache_key(), self.json, self.cache_expiration())
 
   def cache_key(self):
     return self.command() + ':' + self.agency
+
+  def cache_expiration(self):
+    return 86400
 
   def _fetch_raw_xml(self):
     return requests.get('http://webservices.nextbus.com/service/publicXMLFeed', params=self._full_api_params()).text

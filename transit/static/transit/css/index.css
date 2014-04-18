@@ -85,12 +85,21 @@ body {
   overflow: hidden;
   height: inherit;
   font-family: "Lucida Grande";
+  font-size: 0.8em;
   text-shadow: 0px 1px 2px #DDD;
   color: #333;
 }
 
 .route .route-info > div {
-  padding-top: 10px;
+  padding-top: 4px;
+}
+
+.route .route-predictions-minutes {
+  display: inline-block;
+}
+
+.error {
+  color: #EE3333;
 }
 
 .route .route-color {
