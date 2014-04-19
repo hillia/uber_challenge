@@ -5,6 +5,9 @@ from django.core.cache import cache
 from xml.etree.ElementTree import XML
 
 class NextbusBase(object):
+  def __getitem__(self, key):
+    return self.data[key]
+
   def __init__(self, **options):
     self.agency = options['agency']
 
@@ -18,19 +21,19 @@ class NextbusBase(object):
     return dict({ 'command': self.command(), 'a': self.agency }.items() + self.api_params().items())
 
   def fetch(self):
-    self.json = self._fetch_from_cache()
-    if self.json is not None:
+    self.data = self._fetch_from_cache()
+    if self.data is not None:
       return
 
     xml = XML(self._fetch_raw_xml())
-    self.json = self._xml_to_dict(xml)
+    self.data = self._xml_to_dict(xml)
     self._save_to_cache()
 
   def _fetch_from_cache(self):
     return cache.get(self.cache_key())
 
   def _save_to_cache(self):
-    cache.set(self.cache_key(), self.json, self.cache_expiration())
+    cache.set(self.cache_key(), self.data, self.cache_expiration())
 
   def cache_key(self):
     return self.command() + ':' + self.agency
@@ -50,8 +53,8 @@ class NextbusBase(object):
     return dict
 
   def __json__(self):
-    return self.json
+    return json.dumps(self.data)
 
   def __str__(self):
-    return json.dumps(self.__json__())
+    return self.__json__()
 

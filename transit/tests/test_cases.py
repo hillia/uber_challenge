@@ -24,7 +24,7 @@ class RouteListMockTestCase(TestCase):
     self.route_list.fetch()
 
   def testXmlParsing(self):
-    routes = self.route_list.json['routes']
+    routes = self.route_list['routes']
 
     self.assertEqual(len(routes), 8)
     self.assertIn("21", [route['tag'] for route in routes])
@@ -36,7 +36,7 @@ class RouteListLiveTestCase(TestCase):
     self.route_list = RouteList.get(agency='sf-muni')
 
   def testXmlParsing(self):
-    routes = self.route_list.json['routes']
+    routes = self.route_list['routes']
 
     self.assertNotEqual(len(routes), 0)
     for route in routes:
@@ -49,7 +49,7 @@ class RouteConfigLiveTestCase(TestCase):
     self.route_config = RouteConfig.get(agency='sf-muni', tag='N')
 
   def testXmlParsing(self):
-    routes = self.route_config.json['routes']
+    routes = self.route_config['routes']
 
     self.assertEqual(len(routes), 1)
     for stop in routes[0]['stops']:
@@ -91,7 +91,7 @@ class PredictionsMockTestCase(TestCase):
     self.predictions.fetch()
 
   def testXmlParsing(self):
-    predictions = self.predictions.json['predictionss']
+    predictions = self.predictions['predictionss']
 
     self.assertEqual(len(predictions), 2)
     self.assertEqual(len(predictions[0]['directions'][0]['predictions']), 5)

@@ -22,24 +22,24 @@ To populate the model, 1) instantiate it with a dict containing the necessary AP
   
 will give you a model repesenting the 'routeConfig' API command for the J route of the SF Muni.
   
-You can then inspect the data using json():
+You can then inspect the data with the [] accessor:
 
 ```
-  n_route.json['routes'][0]['title'] # 'J-Church'
+  j_route['routes'][0]['title'] # 'J-Church'
 ```
     
 In the dict of data, an XML node's children are placed under a key that is a pluralized form of the XML tag name. Example:
     
 ```
   # XML: <body> <routes tag="J" title="J-Church"> </body>
-  n_route.json['routes'] # [{ tag: "J", title:"J-Church" }, ... ]
+  j_route['routes'] # [{ tag: "J", title:"J-Church" }, ... ]
 ```
   
 XML node attributes are represented as dict key-value pairs:
 
 ```
   # XML: <body> <routes tag="J" title="J-Church"> </body>
-  n_route.json['routes'][0]['title'] # 'J-Church'
+  j_route['routes'][0]['title'] # 'J-Church'
 ```
 
     

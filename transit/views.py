@@ -8,8 +8,7 @@ from transit.models.nextbus import RouteList
 from transit.models.nextbus import Predictions
 
 def index(request):
-  all_routes_json = RouteConfig.get(agency='sf-muni').__str__()
-  return render(request, 'index.html', {'all_routes_json': all_routes_json})
+  return render(request, 'index.html')
 
 def route_list(request):
   return HttpResponse(RouteList.get(agency='sf-muni'))
