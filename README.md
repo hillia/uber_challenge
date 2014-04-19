@@ -4,6 +4,7 @@ Transit
 A webapp to display nearby bus stops and their departure times. 
   * Shows nearby bus routes based on user's browser geolocation.
   * Marks the nearest stop on the route regardless of direction. (TODO: Categorize routes/nearest stops by direction.)
+  * Only supports SF MUNI right now, but could handle other agencies NextBus supports with little modification. 
   
 ##API
 Transit data is retrieved from NextBus API (http://www.nextbus.com/xmlFeedDocs/NextBusXMLFeed.pdf). Each API command has a model that is created by extending the Nextbus.Base class. The commands currently supported are:
