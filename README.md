@@ -5,8 +5,7 @@ A webapp to display nearby bus stops and their departure times.
   * Shows nearby bus routes based on user's browser geolocation.
   * Marks the nearest stop on the route regardless of direction. (TODO: Categorize routes/nearest stops by direction.)
   
-API
---------------
+##API
 Transit data is retrieved from NextBus API (http://www.nextbus.com/xmlFeedDocs/NextBusXMLFeed.pdf). Each API command has a model that is created by extending the Nextbus.Base class. The commands currently supported are:
 
 * RouteList (not used but present)
@@ -43,21 +42,18 @@ XML node attributes are represented as dict key-value pairs:
 ```
 
     
-Caching
---------------
+##Caching
 
 NextBus API responses are cached to reduce wait times. Uses Django's built in filesystem cache.
   
   
-Backbone
---------------
+##Backbone
 Standard Backbone MVC is used. Backbone templates are generated using django-jstemplate + Mustache, and can be found in `transit/static/templates`.
 
 Backbone Models correspond to the back-end API models with the exception that each Backbone Model represents only one such object (a single route's config, a single stop's predictions, etc). API calls which return data for multiple objects are represented instead as Collection (e.g. RouteConfigList, PredictionsList).
 
 
-HTML/CSS
---------------
+##HTML/CSS
 Website has been tested with:
 
 * Chrome 34
@@ -74,8 +70,7 @@ TODO:
 * Use Bootstrap to handle page resizing / mobile better
 
 
-Static files
---------------
+##Static files
 Static files are currently hosted individually from the app.
 
 TODO: 
@@ -84,20 +79,17 @@ TODO:
 * Set up cached static files directory.
 
 
-Tests
---------------
+##Tests
 Only the NextBus API models are covered by tests. Django's unittest library is used.
 
 TODO: Add a Javascript testing framework so that we can test the Backbone models.
   
-About
---------------
+##About
 Written by Ian Hill
  
 LinkedIn: https://www.linkedin.com/pub/ian-hill/1b/341/681
   
-Personal Notes
---------------
+##Personal Notes
 * My first time using Django (and a refresher for Python)
 * First time setting up Backbone MVC from scratch (though I've worked with existing code a fair amount)
 * App is hosted from a rented VM with maximum request #, so caching API calls and condensing them to a few large ones was essential.
